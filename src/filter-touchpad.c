@@ -219,6 +219,7 @@ touchpad_accel_profile_linear(struct motion_filter *filter,
 
   factor = sensible_acceleration_factor(speed_in);
 
+  factor *= accel_filter->speed_factor;
 	return factor * TP_MAGIC_SLOWDOWN;
 }
 

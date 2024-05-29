@@ -13,8 +13,6 @@ sacrificing precision.
 In addition, it disables the pinch gesture, which often triggers incorrectly,
 especially during scrolling while browsing. Scrolling is triggered instead.
 
-The constants are currently not configurable, as its unclear where this config
-might come from. Additionally, `accel_factor` is ignored for now.
 
 libinput
 ========
