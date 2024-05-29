@@ -186,6 +186,24 @@ touchpad_accelerator_destroy(struct motion_filter *filter)
 	free(accel);
 }
 
+static double sensible_acceleration_factor(double speed_in_mm_s)
+{
+  const double baseline = 0.9;
+  const double threshold = 90.0;
+  const double upper_threshold = 400.0;
+  const double max_accel = 4.0;
+
+  if (speed_in_mm_s < 7.0) {
+    return min(baseline, 0.1 * speed_in_mm_s + 0.3);
+  } else if (speed_in_mm_s <= threshold) {
+    return baseline;
+  } else if (speed_in_mm_s <= upper_threshold) {
+    return baseline + (max_accel - baseline) * (speed_in_mm_s - threshold) / (upper_threshold - threshold);
+  } else {
+    return max_accel;
+  }
+}
+
 double
 touchpad_accel_profile_linear(struct motion_filter *filter,
 			      void *data,
@@ -194,85 +212,16 @@ touchpad_accel_profile_linear(struct motion_filter *filter,
 {
 	struct touchpad_accelerator *accel_filter =
 		(struct touchpad_accelerator *)filter;
-	const double threshold = accel_filter->threshold; /* mm/s */
-	const double baseline = 0.9;
 	double factor; /* unitless */
 
 	/* Convert to mm/s because that's something one can understand */
 	speed_in = v_us2s(speed_in) * 25.4/accel_filter->dpi;
 
-	/*
-	   Our acceleration function calculates a factor to accelerate input
-	   deltas with. The function is a double incline with a plateau,
-	   with a rough shape like this:
+  factor = sensible_acceleration_factor(speed_in);
 
-	  accel
-	 factor
-	   ^         ______
-	   |        )
-	   |  _____)
-	   | /
-	   |/
-	   +-------------> speed in
-
-	   Except the second incline is a curve, but well, asciiart.
-
-	   The first incline is a linear function in the form
-		   y = ax + b
-		   where y is speed_out
-		         x is speed_in
-			 a is the incline of acceleration
-			 b is minimum acceleration factor
-	   for speeds up to the lower threshold, we decelerate, down to 30%
-	   of input speed.
-		   hence 1 = a * 7 + 0.3
-		       0.7 = a * 7  => a := 0.1
-		   deceleration function is thus:
-			y = 0.1x + 0.3
-
-	   The first plateau is the baseline.
-
-	   The second incline is a curve up, based on magic numbers
-	   obtained by trial-and-error.
-
-	   Above the second incline we have another plateau because
-	   by then you're moving so fast that extra acceleration doesn't
-	   help.
-
-	  Note:
-	  * The minimum threshold is a result of trial-and-error and
-	    has no other special meaning.
-	  * 0.3 is chosen simply because it is above the Nyquist frequency
-	    for subpixel motion within a pixel.
-	*/
-
-	if (speed_in < 7.0) {
-		factor = min(baseline, 0.1 * speed_in + 0.3);
-	/* up to the threshold, we keep factor 1, i.e. 1:1 movement */
-	} else if (speed_in < threshold) {
-		factor = baseline;
-	} else {
-
-	/* Acceleration function above the threshold is a curve up
-	   to four times the threshold, because why not.
-
-	   Don't assume anything about the specific numbers though, this was
-	   all just trial and error by tweaking numbers here and there, then
-	   the formula was optimized doing basic maths.
-
-	   You could replace this with some other random formula that gives
-	   the same numbers and it would be just as correct.
-
-	 */
-		const double upper_threshold = threshold * 4.0;
-		speed_in = min(speed_in, upper_threshold);
-
-		factor = 0.0025 * (speed_in/threshold) * (speed_in - threshold) + baseline;
-	}
-
-	factor *= accel_filter->speed_factor;
 	return factor * TP_MAGIC_SLOWDOWN;
 }
+
 
 static const struct motion_filter_interface accelerator_interface_touchpad = {
 	.type = LIBINPUT_CONFIG_ACCEL_PROFILE_ADAPTIVE,
