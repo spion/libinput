@@ -188,20 +188,20 @@ touchpad_accelerator_destroy(struct motion_filter *filter)
 
 static double sensible_acceleration_factor(double speed_in_mm_s)
 {
-  const double baseline = 0.9;
-  const double threshold = 90.0;
-  const double upper_threshold = 400.0;
-  const double max_accel = 4.0;
+	const double baseline = 0.9;
+	const double threshold = 90.0;
+	const double upper_threshold = 400.0;
+	const double max_accel = 4.0;
 
-  if (speed_in_mm_s < 7.0) {
-    return min(baseline, 0.1 * speed_in_mm_s + 0.3);
+	if (speed_in_mm_s < 7.0) {
+		return min(baseline, 0.1 * speed_in_mm_s + 0.3);
   } else if (speed_in_mm_s <= threshold) {
-    return baseline;
-  } else if (speed_in_mm_s <= upper_threshold) {
-    return baseline + (max_accel - baseline) * (speed_in_mm_s - threshold) / (upper_threshold - threshold);
+		return baseline;
+	} else if (speed_in_mm_s <= upper_threshold) {
+		return baseline + (max_accel - baseline) * (speed_in_mm_s - threshold) / (upper_threshold - threshold);
   } else {
-    return max_accel;
-  }
+		return max_accel;
+	}
 }
 
 double
@@ -219,10 +219,9 @@ touchpad_accel_profile_linear(struct motion_filter *filter,
 
   factor = sensible_acceleration_factor(speed_in);
 
-  factor *= accel_filter->speed_factor;
+	factor *= accel_filter->speed_factor;
 	return factor * TP_MAGIC_SLOWDOWN;
 }
-
 
 static const struct motion_filter_interface accelerator_interface_touchpad = {
 	.type = LIBINPUT_CONFIG_ACCEL_PROFILE_ADAPTIVE,
