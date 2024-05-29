@@ -1,3 +1,21 @@
+fork notes
+========
+
+This fork of libinput changes the default touchpad acceleration profile to
+something that makes a little bit more sense - at least on my touchpad
+
+![image](https://github.com/spion/libinput/assets/502412/60ffab83-a8e9-4143-b551-f8bf01d72417)
+
+The change to a linear acceleration increase results with more predictable,
+less jumpy behaviour, while also allowing higher movement speed without
+sacrificing precision.
+
+In addition, it disables the pinch gesture, which often triggers incorrectly,
+especially during scrolling while browsing. Scrolling is triggered instead.
+
+The constants are currently not configurable, as its unclear where this config
+might come from. Additionally, `accel_factor` is ignored for now.
+
 libinput
 ========
 

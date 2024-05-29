@@ -983,7 +983,7 @@ tp_gesture_detect_motion_gestures(struct tp_dispatch *tp, uint64_t time)
 		    tp->gesture.finger_count > 2 &&
 		    tp->gesture.enabled &&
 		    tp->thumb.pinch_eligible) {
-			tp_gesture_handle_event(tp, GESTURE_EVENT_PINCH, time);
+			tp_gesture_handle_event(tp, GESTURE_EVENT_SCROLL, time);
 			return;
 		}
 	}
@@ -1018,7 +1018,7 @@ tp_gesture_detect_motion_gestures(struct tp_dispatch *tp, uint64_t time)
 	}
 
 	/* If the touches are moving away from each other, this is a pinch */
-	tp_gesture_handle_event(tp, GESTURE_EVENT_PINCH, time);
+	tp_gesture_handle_event(tp, GESTURE_EVENT_SCROLL, time);
 }
 
 static bool
@@ -1168,7 +1168,7 @@ tp_gesture_handle_state_scroll(struct tp_dispatch *tp, uint64_t time)
 	 */
 	if (time < (tp->gesture.initial_time + DEFAULT_GESTURE_PINCH_TIMEOUT) &&
 	    tp_gesture_is_pinch(tp)) {
-		tp_gesture_handle_event(tp, GESTURE_EVENT_PINCH, time);
+		tp_gesture_handle_event(tp, GESTURE_EVENT_SCROLL, time);
 		return;
 	}
 
